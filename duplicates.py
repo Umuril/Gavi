@@ -23,3 +23,6 @@ def duplicates():
             for k, v in t.items():
                 f.write(str(k) + " : " + str(v) + '\n')
             f.write('\n')
+
+if __name__ == "__main__":
+    duplicates()
