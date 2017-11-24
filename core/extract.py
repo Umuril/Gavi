@@ -1,56 +1,49 @@
 import re
-from util import write_tweets
+from .util import write_tweets
 
-fields = ('TextTW', 'Lang') # fields to be extracted
+DEFAULT_INPUT_FILE = 'txt/mini_mostre.txt'
+DEFAULT_OUTPUT_FILE = 'txt/extract.txt'
+DEFAULT_FIELDS = ('TextTW', 'Lang')
 
-# Pattern used to split the file in single tweet's block of information.
-# A block is identified by two newline characters followed by a field
-# name or by the end of the string.
-split_pattern = re.compile(r'\n\n(?=[A-z_-]+ : |\Z)')
-# Pattern used to extract only some fields. It matches both the field
-# name and the content. The content matches every character that is not
-# the next field or the end of the string.
-fields_pattern = re.compile(r'(^' +
-                            '|'.join(fields) +
-                            ') : (.+?)(?=\n+[A-z_-]+ : |\Z)',
-                            re.MULTILINE | re.DOTALL)
-
-def extract():
+def extract(fields, filename):
     """Extracts only valuable fields from the tweets"""
+
+    # Pattern used to split the file in single tweet's block of
+    # information. A block is identified by two newline characters
+    # followed by a field name or by the end of the string.
+    split_pattern = re.compile(r'\n\n(?=[A-z_-]+ : |\Z)')
+    # Pattern used to extract only some fields.
+    # It matches both the field name and the content.
+    # The content matches every character that is not the next field
+    # or the end of the string.
+    fields_pattern = re.compile(r'(^' +
+                                '|'.join(fields) +
+                                ') : (.+?)(?=\n+[A-z_-]+ : |\Z)',
+                                re.MULTILINE | re.DOTALL)
+    
     tweets = []
 
-    with open('../txt/mini_mostre.txt') as in_file:
+    with open(filename) as in_file:
         for tweet_info in split_pattern.split(in_file.read()):
-            tweet = dict(fields_pattern.findall(tweet_info))
+            tweet = tuple(fields_pattern.findall(tweet_info))
             if tweet:
                 tweets.append(tweet)
 
-    write_tweets(tweets, '../txt/extract.txt')
-
-##    tweets = []
-##    
-##    with open('../txt/mini_mostre.txt') as in_file:
-##        tweet = {}
-##        for line in in_file:
-##
-##            if line.startswith(fields):
-##                pass
-##
-##            for field in renamed_fields:
-##                if line.startswith(field):
-##                    tweet[renamed_fields[field]] = line[len(field):].strip('\n :')
-##                    break
-##
-##            if line.startswith(fields):
-##                tweet.update([[x.strip() for x in line.split(':', 1)]])
-##
-##            if not line.strip() and tweet:
-##                tweets.append(tweet)
-##                tweet = {}
-##
-##    with open("../txt/extract.txt", "w") as out_file:
-##        for i in tweets:
-##            out_file.write(str(i)+'\n')
+    return tweets
 
 if __name__ == "__main__":
-    extract()
+    import argparse as ap
+
+    parser = ap.ArgumentParser(description=extract.__doc__)
+    parser.add_argument('fields', type=str, nargs='*',
+                        default=DEFAULT_FIELDS,
+                        help='fields to be extracted')
+    parser.add_argument('infile', nargs='?', type=ap.FileType('r'),
+                        default=DEFAULT_INPUT_FILE)
+    parser.add_argument('outfile', nargs='?', type=ap.FileType('r'),
+                        default=DEFAULT_OUTPUT_FILE)
+    
+    args = parser.parse_args()
+    
+    write_tweets(extract(args.fields, args.infile.name),
+                 args.outfile.name)
