@@ -41,9 +41,9 @@ def match():
 
     #confronto con le parole del tweet e quella della lista    (string.find("banana", "na") restituisce 2)
     for word in wordlist:
-        if (string.find(stringValues.upper(), word.upper()))!= 0 #se è diverso da zero significa che word è in stringValues
-            #allora ho trovato il match in teoria quindi dovrei aggiungere il campo "nome mostra" al tweet
-
+        if (string.find(stringValues.upper(), word.upper()))!= 0: #se è diverso da zero significa che word è in stringValues
+        #allora ho trovato il match in teoria quindi dovrei aggiungere il campo "nome mostra" al tweet
+            pass
 
 
 

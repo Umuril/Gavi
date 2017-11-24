@@ -2,8 +2,10 @@ import itertools
 
 def duplicates():
     tweets = []
-    with open('txt/extract.txt') as f:
-        for key, group in itertools.groupby(f, lambda line: line == '\n'):
+    with open('../txt/extract.txt') as in_file:
+        for key, group in itertools.groupby(in_file,
+                                            lambda line: line == '\n'):
+            #print(key, group)
             if not key:
                 tweet = {}
                 for item in group:

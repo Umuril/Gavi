@@ -1,10 +1,9 @@
-from . import *
+from core import *
 
-def main():
-    extract.extract()
+def main():    
+    extract()
     duplicates()
     translate()
-
 
 if __name__ == '__main__':
     main()
