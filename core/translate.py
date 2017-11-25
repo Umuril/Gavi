@@ -1,30 +1,42 @@
-import itertools
 from googletrans import Translator
 
-def translate():
+from .util import load_tweets, dump_tweets, add_io_argparser, write_tweets_txt
+from . import extract
+
+TEXT_FIELD = 'TextTW'
+LANG_FIELD = 'Lang'
+UNKNOWN_LANG = 'und'
+LANG = 'en'
+DEFAULT_OUTPUT_FILE = 'out/translated.pkl'
+DEFAULT_OUTPUT_TXT_FILE = 'txt/translated.txt'
+
+def translate(filename, lang):
+    """Translates all the tweets to the same language"""
     translator = Translator()
 
-    with open('txt/duplicates.txt') as filefrom:
-        with open('txt/translate.txt', 'w') as fileto:
-            for key, group in itertools.groupby(filefrom, lambda line: line == '\n'):
-                if not key:
-                    tweet = {}
-                    for item in group:
-                        splitted = item.split(':')
-                        field, value = splitted[0].strip(), ':'.join(splitted[1:]).strip()
-                        tweet[field] = value
+    tweets = load_tweets(filename)
+    for tweet in tweets:
+        if tweet[LANG_FIELD] == UNKNOWN_LANG:
+            tweet[LANG_FIELD] = 'auto'
 
-                    if (tweet["Lang"] != 'en'):
-                        if (tweet["Lang"] == 'und'):
-                            tweet["Text"] = translator.translate(tweet["Text"]).text
-                        else:
-                            tweet["Text"] = translator.translate(tweet["Text"], src=tweet["Lang"]).text
+        if tweet[LANG_FIELD] != LANG:
+            tweet[TEXT_FIELD] = translator.translate(tweet[TEXT_FIELD],
+                                                     src=tweet[LANG_FIELD],
+                                                     dest=lang).text
 
-
-
-                    for k, v in tweet.items():
-                        fileto.write(str(k) + " : " + str(v) + '\n')
-                    fileto.write('\n')
+    return tweets
 
 if __name__ == '__main__':
-    translate()
+    import argparse as ap
+
+    argparser = ap.ArgumentParser(description=translate.__doc__)
+    argparser.add_argument('-l', '--lang', default=LANG,
+                           help='destination language')
+    add_io_argparser(argparser, extract.DEFAULT_OUTPUT_FILE,
+                     DEFAULT_OUTPUT_FILE, DEFAULT_OUTPUT_TXT_FILE)
+    args = argparser.parse_args()
+    
+    tweets = translate(args.in_file.name, args.lang)
+    dump_tweets(tweets, args.out_file.name)
+    if args.txt_file:
+        write_tweets_txt(tweets, args.txt_file.name)

@@ -109,3 +109,6 @@ txt/
 !txt/mostre.txt
 !txt/startedSet.txt
 !txt/tweet.txt
+
+# Pickle files
+out/

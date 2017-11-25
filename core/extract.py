@@ -1,8 +1,10 @@
 import re
-from .util import write_tweets
+
+from .util import dump_tweets, write_tweets_txt, add_io_argparser
 
 DEFAULT_INPUT_FILE = 'txt/mini_mostre.txt'
-DEFAULT_OUTPUT_FILE = 'txt/extract.txt'
+DEFAULT_OUTPUT_FILE = 'out/extracted.pkl'
+DEFAULT_OUTPUT_TXT_FILE = 'txt/extracted.txt'
 DEFAULT_FIELDS = ('TextTW', 'Lang')
 
 def extract(fields, filename):
@@ -22,10 +24,9 @@ def extract(fields, filename):
                                 re.MULTILINE | re.DOTALL)
     
     tweets = []
-
     with open(filename) as in_file:
         for tweet_info in split_pattern.split(in_file.read()):
-            tweet = tuple(fields_pattern.findall(tweet_info))
+            tweet = dict(fields_pattern.findall(tweet_info))
             if tweet:
                 tweets.append(tweet)
 
@@ -34,16 +35,15 @@ def extract(fields, filename):
 if __name__ == "__main__":
     import argparse as ap
 
-    parser = ap.ArgumentParser(description=extract.__doc__)
-    parser.add_argument('fields', type=str, nargs='*',
-                        default=DEFAULT_FIELDS,
-                        help='fields to be extracted')
-    parser.add_argument('infile', nargs='?', type=ap.FileType('r'),
-                        default=DEFAULT_INPUT_FILE)
-    parser.add_argument('outfile', nargs='?', type=ap.FileType('r'),
-                        default=DEFAULT_OUTPUT_FILE)
-    
-    args = parser.parse_args()
-    
-    write_tweets(extract(args.fields, args.infile.name),
-                 args.outfile.name)
+    argparser = ap.ArgumentParser(description=extract.__doc__)
+    argparser.add_argument('-f', '--fields', nargs='+',
+                           default=DEFAULT_FIELDS,
+                           help='fields to be extracted')
+    add_io_argparser(argparser, DEFAULT_INPUT_FILE, DEFAULT_OUTPUT_FILE,
+                     DEFAULT_OUTPUT_TXT_FILE)
+    args = argparser.parse_args()
+
+    tweets = extract(args.fields, args.in_file.name)
+    dump_tweets(tweets, args.out_file.name)
+    if args.txt_file:
+        write_tweets_txt(tweets, args.txt_file.name)
