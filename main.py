@@ -1,9 +1,9 @@
 from core import *
 
-def main():    
-    extract()
+def main():
+    tweets = extract.extract(txt = True)
     #duplicates()
-    #translate()
+    tweets = translate.translate(tweets = tweets, txt = True)
 
 if __name__ == '__main__':
     main()

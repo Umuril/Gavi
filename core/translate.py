@@ -1,6 +1,6 @@
 from googletrans import Translator
 
-from .util import load_tweets, dump_tweets, add_io_argparser, write_tweets_txt
+from .util import *
 from . import extract
 
 TEXT_FIELD = 'TextTW'
@@ -10,11 +10,14 @@ LANG = 'en'
 DEFAULT_OUTPUT_FILE = 'out/translated.pkl'
 DEFAULT_OUTPUT_TXT_FILE = 'txt/translated.txt'
 
-def translate(filename, lang):
+@save_to_txt(DEFAULT_OUTPUT_TXT_FILE)
+def translate(tweets = extract.DEFAULT_OUTPUT_FILE, lang = LANG):
     """Translates all the tweets to the same language"""
     translator = Translator()
 
-    tweets = load_tweets(filename)
+    if isinstance(tweets, str):
+        tweets = load_tweets(tweets)
+
     for tweet in tweets:
         if tweet[LANG_FIELD] == UNKNOWN_LANG:
             tweet[LANG_FIELD] = 'auto'

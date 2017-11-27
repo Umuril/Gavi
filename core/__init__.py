@@ -1,1 +1,1 @@
-__all__ = ['extract', 'duplicates', 'translate', 'match', 'util']
+__all__ = ['extract', 'translate', 'match', 'util']
