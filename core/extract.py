@@ -7,8 +7,8 @@ DEFAULT_OUTPUT_FILE = 'out/extracted.pkl'
 DEFAULT_OUTPUT_TXT_FILE = 'txt/extracted.txt'
 DEFAULT_FIELDS = ('TextTW', 'Lang')
 
-@save_to_txt(DEFAULT_OUTPUT_TXT_FILE)
-def extract(fields = DEFAULT_FIELDS, filename = DEFAULT_INPUT_FILE, output = DEFAULT_OUTPUT_FILE):
+@optional_output(DEFAULT_OUTPUT_FILE, DEFAULT_OUTPUT_TXT_FILE)
+def extract(fields=DEFAULT_FIELDS, input_file=DEFAULT_INPUT_FILE):
     """Extracts only valuable fields from the tweets"""
 
     # Pattern used to split the file in single tweet's block of
@@ -25,15 +25,12 @@ def extract(fields = DEFAULT_FIELDS, filename = DEFAULT_INPUT_FILE, output = DEF
                                 re.MULTILINE | re.DOTALL)
     
     tweets = []
-    with open(filename) as in_file:
+    with open(input_file) as in_file:
         for tweet_info in split_pattern.split(in_file.read()):
             tweet = dict(fields_pattern.findall(tweet_info))
             if tweet:
                 tweets.append(tweet)
 
-    dump_tweets(tweets, output)
-    # if txt:
-    #     write_tweets_txt(tweets, DEFAULT_OUTPUT_TXT_FILE if txt == True else txt)
     return tweets
 
 if __name__ == "__main__":
@@ -47,4 +44,5 @@ if __name__ == "__main__":
                      DEFAULT_OUTPUT_TXT_FILE)
     args = argparser.parse_args()
 
-    tweets = extract(args.fields, args.in_file.name, args.out_file.name, txt = args.txt_file.name if args.txt_file else None)
+    extract(args.fields, args.in_file, output=args.out_file,
+            txt=args.txt_file)

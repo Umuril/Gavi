@@ -7,16 +7,15 @@ TEXT_FIELD = 'TextTW'
 LANG_FIELD = 'Lang'
 UNKNOWN_LANG = 'und'
 LANG = 'en'
+DEFAULT_INPUT_FILE = extract.DEFAULT_OUTPUT_FILE
 DEFAULT_OUTPUT_FILE = 'out/translated.pkl'
 DEFAULT_OUTPUT_TXT_FILE = 'txt/translated.txt'
 
-@save_to_txt(DEFAULT_OUTPUT_TXT_FILE)
-def translate(tweets = extract.DEFAULT_OUTPUT_FILE, lang = LANG):
+@optional_input(DEFAULT_INPUT_FILE)
+@optional_output(DEFAULT_OUTPUT_FILE, DEFAULT_OUTPUT_TXT_FILE)
+def translate(tweets, lang=LANG):
     """Translates all the tweets to the same language"""
     translator = Translator()
-
-    if isinstance(tweets, str):
-        tweets = load_tweets(tweets)
 
     for tweet in tweets:
         if tweet[LANG_FIELD] == UNKNOWN_LANG:
@@ -35,11 +34,8 @@ if __name__ == '__main__':
     argparser = ap.ArgumentParser(description=translate.__doc__)
     argparser.add_argument('-l', '--lang', default=LANG,
                            help='destination language')
-    add_io_argparser(argparser, extract.DEFAULT_OUTPUT_FILE,
-                     DEFAULT_OUTPUT_FILE, DEFAULT_OUTPUT_TXT_FILE)
+    add_io_argparser(argparser, DEFAULT_INPUT_FILE, DEFAULT_OUTPUT_FILE,
+                     DEFAULT_OUTPUT_TXT_FILE)
     args = argparser.parse_args()
     
-    tweets = translate(args.in_file.name, args.lang)
-    dump_tweets(tweets, args.out_file.name)
-    if args.txt_file:
-        write_tweets_txt(tweets, args.txt_file.name)
+    translate(args.in_file, args.lang)
