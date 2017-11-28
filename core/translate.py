@@ -21,7 +21,7 @@ def translate(tweets, lang=LANG):
         if tweet[LANG_FIELD] == UNKNOWN_LANG:
             tweet[LANG_FIELD] = 'auto'
 
-        if tweet[LANG_FIELD] != LANG:
+        if tweet[LANG_FIELD] != lang:
             tweet[TEXT_FIELD] = translator.translate(tweet[TEXT_FIELD],
                                                      src=tweet[LANG_FIELD],
                                                      dest=lang).text
@@ -38,4 +38,5 @@ if __name__ == '__main__':
                      DEFAULT_OUTPUT_TXT_FILE)
     args = argparser.parse_args()
     
-    translate(args.in_file, args.lang)
+    translate(args.lang, input_file=args.in_file, output=args.out_file,
+              txt=args.txt_file)
