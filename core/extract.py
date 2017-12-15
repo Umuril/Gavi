@@ -1,11 +1,12 @@
 import re
 
-from .util import *
+from .utils import *
+from . import fields
 
 DEFAULT_INPUT_FILE = 'txt/mini_mostre.txt'
-DEFAULT_OUTPUT_FILE = 'out/extracted.pkl'
-DEFAULT_OUTPUT_TXT_FILE = 'txt/extracted.txt'
-DEFAULT_FIELDS = ('TextTW', 'Lang')
+DEFAULT_OUTPUT_FILE = 'out/extracted'
+DEFAULT_OUTPUT_TXT_FILE = 'out/extracted.txt'
+DEFAULT_FIELDS = (fields.TEXT, fields.LANG, fields.RETWEET_COUNT)
 
 @optional_output(DEFAULT_OUTPUT_FILE, DEFAULT_OUTPUT_TXT_FILE)
 def extract(fields=DEFAULT_FIELDS, input_file=DEFAULT_INPUT_FILE):
@@ -44,5 +45,5 @@ if __name__ == "__main__":
                      DEFAULT_OUTPUT_TXT_FILE)
     args = argparser.parse_args()
 
-    extract(args.fields, args.in_file, output=args.out_file,
-            txt=args.txt_file)
+    extract(args.fields, args.input_file, output_file=args.output_file,
+            txt_file=args.txt_file)

@@ -1,20 +1,22 @@
-import itertools
+from .util import *
 
-def template():
-    with open('txt/filefrom.txt') as filefrom, open('txt/fileto.txt', 'w') as fileto:
-        for key, group in itertools.groupby(filefrom, lambda line: line == '\n'):
-            if not key:
-                tweet = {}
-                for item in group:
-                    splitted = item.split(':')
-                    field, value = splitted[0].strip(), ':'.join(splitted[1:]).strip()
-                    tweet[field] = value
+DEFAULT_INPUT_FILE = ''
+DEFAULT_OUTPUT_FILE = ''
+DEFAULT_OUTPUT_TXT_FILE = ''
 
-                # Codice qui
-
-                for k, v in tweet.items():
-                    fileto.write(str(k) + " : " + str(v) + '\n')
-                fileto.write('\n')
+@optional_input(DEFAULT_INPUT_FILE)
+@optional_output(DEFAULT_OUTPUT_FILE, DEFAULT_OUTPUT_TXT_FILE)
+def function(*args, **kwargs):
+    """Doc"""
+    pass
 
 if __name__ == "__main__":
-    template()
+    import argparse as ap
+
+    argparser = ap.ArgumentParser(description=function.__doc__)
+    add_io_argparser(argparser, DEFAULT_INPUT_FILE, DEFAULT_OUTPUT_FILE,
+                     DEFAULT_OUTPUT_TXT_FILE)
+    args = argparser.parse_args()
+
+    function(args.fields, args.in_file, output=args.out_file,
+             txt=args.txt_file)
