@@ -1,4 +1,7 @@
 from core import *
+import regex as re
+
+from nltk.corpus import stopwords
 
 def main():
     #tweets = extract.extract(txt=True)

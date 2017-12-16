@@ -1,3 +1,5 @@
+import re
+import itertools as it
 from googletrans import Translator
 
 from .utils import *
@@ -13,16 +15,24 @@ DEFAULT_LANG = 'en'
 @optional_output(DEFAULT_OUTPUT_FILE, DEFAULT_OUTPUT_TXT_FILE)
 def translate(tweets, lang=DEFAULT_LANG):
     """Translates all the tweets to the same language"""
+
     translator = Translator()
 
+    # matches every character c that chr(c) <= 65535
+    ignore_unicode_pattern = re.compile('[^\u0000-\uFFFF]')
+    
     for tweet in tweets:
         if tweet[fields.LANG] == UNKNOWN_LANG:
             tweet[fields.LANG] = 'auto'
 
         if tweet[fields.LANG] != lang:
-            tweet[fields.TEXT] = translator.translate(tweet[fields.TEXT],
+            text = ignore_unicode_pattern.sub('', tweet[fields.TEXT])
+            try:
+                tweet[fields.TEXT] = translator.translate(text,
                                                       src=tweet[fields.LANG],
                                                       dest=lang).text
+            except:
+                print(tweet)
 
     return tweets
 

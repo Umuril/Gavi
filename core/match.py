@@ -1,57 +1,63 @@
-import itertools
-import string
+import re
+from nltk.corpus import stopwords
 
-def match():
-    elementSet={}  #qua ci va l'elenco del set iniziale delle mostre con i corrispondenti eventi
+from .utils import *
+from . import translate, fields
 
-    with open('txt/startedSet.txt') as startedfile:
-        for line in startedfile:
-            splitted = line.split(':')
-            field, value = splitted[0].strip(), ':'.join(splitted[1:]).strip()
-            elementSet[field] = value
+DEFAULT_INPUT_FILE = translate.DEFAULT_OUTPUT_FILE
+DEFAULT_OUTPUT_FILE = 'out/matched'
+DEFAULT_OUTPUT_TXT_FILE = 'out/matched.txt'
+EN_STOPWORDS = stopwords.words('english')
 
-    print(str(elementSet))
+def read_exhibitions(filename):
+    exhibitions = []
+    words_pattern = re.compile('\w+')
 
-    with open('txt/translate.txt') as filefrom:    #file di partenza
-        with open('txt/match.txt', 'w') as fileto:  #file di destinazione
-            for key, group in itertools.groupby(filefrom, lambda line: line == '\n'):   #ciclo per prendere un tweet alla volta
-                if not key:  #quando key=false significa che il ciclo è arrivato a leggere l'invio che separa i tweet
-                    tweet = {}  #dictionary
-                    for item in group: #ciclo per dividere la coppia chiave:valore per ogni tweet
-                        splitted = item.split(':')
-                        field, value = splitted[0].strip(), ':'.join(splitted[1:]).strip()
-                        tweet[field] = value
+    with open(filename) as in_file:
+        for line in in_file:
+            place, name = line.strip().lower().split(' : ')
+            exhibition = []
+            exhibition.append([word for word in words_pattern.findall(place)
+                               if word not in EN_STOPWORDS])
+            exhibition.append([word for word in words_pattern.findall(name)
+                               if word not in EN_STOPWORDS])
+            exhibitions.append(exhibition)
 
-    print(str(tweet))
-                    # qui ho il dictionary tweet che contiene un solo tweet con i soli parametri che mi servono e tradotto in inglese
-                    # Codice qui
+    return exhibitions
 
-    # lista delle parole del tweet in questione
-    # for values in tweet.values():
-    #     string= values
-    #     wordlist= string.split()
-    #     print(wordlist)
+@optional_input(DEFAULT_INPUT_FILE)
+@optional_output(DEFAULT_OUTPUT_FILE, DEFAULT_OUTPUT_TXT_FILE)
+def match(tweets):
+    """Tries to tag each tweet with one exhibition"""
 
-    #lista delle parole del set senza spazi
-    for key, values in elementSet.items():
-        stringKey= key.replace(' ', '')
-        stringValues = values.replace(' ', '')
-        print(stringKey)
-        print(stringValues)
+    exhibitions = read_exhibitions('txt/exhibitions.txt')
+    out_tweets = []
+    matched = False
+    for tweet in tweets:
+        text = tweet[fields.TEXT].lower()
+        for place_tokens, name_tokens in exhibitions:
+            place_similarity = (sum(x in text for x in place_tokens)/
+                                len(place_tokens))
+            name_similarity = (sum(x in text for x in name_tokens)/
+                               len(name_tokens))
+            if place_similarity*name_similarity > 1/3:
+                tweet[' '.join(name_tokens)] = (place_similarity,
+                                                name_similarity)
+                matched = True
 
-    #confronto con le parole del tweet e quella della lista    (string.find("banana", "na") restituisce 2)
-    for word in wordlist:
-        if (string.find(stringValues.upper(), word.upper()))!= 0: #se è diverso da zero significa che word è in stringValues
-        #allora ho trovato il match in teoria quindi dovrei aggiungere il campo "nome mostra" al tweet
-            pass
+        if matched:
+            out_tweets.append(tweet)
+            matched = False
 
+    return out_tweets
 
+if __name__ == "__main__":
+    import argparse as ap
 
+    argparser = ap.ArgumentParser(description=match.__doc__)
+    add_io_argparser(argparser, DEFAULT_INPUT_FILE, DEFAULT_OUTPUT_FILE,
+                     DEFAULT_OUTPUT_TXT_FILE)
+    args = argparser.parse_args()
 
-
-                    # for k, v in tweet.items():
-                    #     fileto.write(str(k) + " : " + str(v) + '\n')
-                    # fileto.write('\n')
-
-if __name__ == '__main__':
-    match()
+    match(input_file=args.input_file, output_file=args.output_file,
+          txt_file=args.txt_file)
