@@ -31,8 +31,8 @@ def translate(tweets, lang=DEFAULT_LANG):
                 tweet[fields.TEXT] = translator.translate(text,
                                                       src=tweet[fields.LANG],
                                                       dest=lang).text
-            except:
-                print(tweet)
+            except Exception as e:
+                print(e, tweet)
 
     return tweets
 

@@ -15,12 +15,10 @@ def read_exhibitions(filename):
 
     with open(filename) as in_file:
         for line in in_file:
-            place, name = line.strip().lower().split(' : ')
             exhibition = []
-            exhibition.append([word for word in words_pattern.findall(place)
-                               if word not in EN_STOPWORDS])
-            exhibition.append([word for word in words_pattern.findall(name)
-                               if word not in EN_STOPWORDS])
+            for part in line.strip().lower().split(' : '):
+                exhibition.append([word for word in words_pattern.findall(part)
+                                   if word not in EN_STOPWORDS])
             exhibitions.append(exhibition)
 
     return exhibitions
@@ -31,6 +29,7 @@ def match(tweets):
     """Tries to tag each tweet with one exhibition"""
 
     exhibitions = read_exhibitions('txt/exhibitions.txt')
+    print(exhibitions)
     out_tweets = []
     matched = False
     for tweet in tweets:

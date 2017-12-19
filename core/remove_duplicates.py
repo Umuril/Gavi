@@ -16,7 +16,7 @@ def remove_duplicates(tweets):
     out_tweets = []
     text_keyfunc = lambda x: x[fields.TEXT]
     tweets = sorted(tweets, key=text_keyfunc)
-    for tweet, group in it.groupby(tweets, text_keyfunc):
+    for text, group in it.groupby(tweets, text_keyfunc):
         out_tweets.append(
             max(group, key=lambda x: int(x.get(fields.RETWEET_COUNT, 0))))
 
